@@ -1,0 +1,160 @@
+---
+title: Haben Lehramtsstudierende mit Migrationshintergrund differentielle Überzeugungen zu heterogenen Lerngruppen?
+author: "Samuel Merk, Thorsten Bohl"
+csl: /Users/samuelmerk/Documents/Style/DGPS.csl
+output:
+  ioslides_presentation:
+    css: /Users/samuelmerk/Documents/Style/my.css
+    incremental: no
+    logo: /Users/samuelmerk/Documents/Style/logo.png
+    smaller: no
+    widescreen: yes
+resource_files:
+  -Img/Tab_1.png
+  -Img/Tab_2.png
+  -Img/Fig_1.png
+  -Img/Fig_2.png
+  -Img/Fig_4.png
+bibliography: /Users/samuelmerk/Documents/library.bib
+---
+
+## Inhaltlicher Überblick {.nullneunem}
+
+* Ableitung der Fragestellung
+* Stichprobe & Instrument
+     * Konstruktvalidität
+         * Konsekutive Faktorenanalysen
+         * Mehrebenen Faktorenanalyse
+         * Within-Person Differenzierung
+* Differentielle Überzeugungen Studierender mit MHG
+    * Propensity Scores als Ähnlichkeitsmaß
+    * One-to-one nearest neighbor matching
+    * Differentielle Überzeugungen
+* Diskussion
+  
+  
+<div class="centered" font-size=8pt><span style="color:#C57974"><font size="3pt"><p></p><p></p>
+Die interaktiven Folien können unter https://XXX und deren Quellcode unter https://github.com/sammerk/AEPF18_diff_Ue heruntergeladen werden.</font></span></div>
+
+# Ableitung der Fragestellung
+
+## Divergenz: Normative Erwartungen vs. empirische Realität
+### Normative Erwartungen
+* _"besondere normative Erwartungen"_ [@Brau2013]
+* _"Change Agents"_ und _"identitätsstiftende Vorbilder"_ [@Smith2015]
+* _"Kulturbrückenbauer, Vermittler, Spachübersetzer"_ [@Georgi2013; @Georgi2011]
+
+### Empirische Befunde
+* Qualitative Arbeiten dominieren im deutsprachigen Raum [@Strasser2009]
+* International sind drei Schwerpunkte dominant [@Karakasoglu2011]:
+     * Repräsentation und Rekrutierung von Minority Teachers
+     * Minority Teachers als Rollenvorbilder und Change Agents
+     * Diskriminierungserfahrung in Ausbildung und Kollegium 
+
+## Forschungsfrage
+> Inwiefern prädiziert das Herkunftsmerkmal Migrationshintergrund die Einstellungen zu heterogenen Lerngruppen als Aspekt professioneller Kompetenz?
+
+# Stichprobe und Instrument
+
+## Stichprobe: Gelegenheitsstichprobe
+* $N = 877$ Lehramtsstudierende
+* Davon $622$ weiblich
+* $432$ Studierende des gymnasialen Lehramts
+* $169$ Studierende mit Migrationshintergrundaus
+* Sechs Hochschulstandorte in Süddeutschland 
+
+## Instrument
+Instrument von Gebauer McElvany & Klukas [-@Gebauer2013]
+```{r, echo = F, fig.cap="Tabelle 1: Struktur des Instrumentes von Gebauer et al. [-@Gebauer2013]", out.width="90%", fig.align='center'}
+knitr::include_graphics("Img/Tab_1.png")
+```
+
+## Konstruktvalidität: Konsekutive CFA [@Merk2018a]
+* kulturelle Heterogenität: $\chi^2$ = 756.712, _df_ = 265, CFI = .918, TLI = .907, RMSEA = .048, SRMR = .049, 
+* Leistungsheterogenität: $\chi^2$ = 1056.735, _df_ = 265, CFI = .902, TLI = .889, RMSEA = .061, SRMR = .061
+* soziale Heterogenität: $\chi^2$ = 1013.202, _df_ = 264, CFI = .912, TLI = .900, RMSEA = .059, SRMR = .054
+
+## Mehrebenen Faktorenanalyse {.nullachem}
+__Grundidee:__ Simultane Überprüfung der Fünfdimensionalität innerhalb von Personen ("Kontrolle" der personenspezifischen Mittelwerte je Item") und zwischen Personen (Fünfdimensionalität der personenspezifischen Mittelwerte)
+
+```{r, echo = F, fig.cap="Abb. 1: Mehrebenen Faktorenanalyse (χ^2^ = 1772.8, df = 522, CFI = .936, TLI = .927, RMSEA = .030, SRMR~within~ = .050, SRMR~between~ = .088). Für Details siehe Merk et al. [-@Merk2018a]", out.width="53%", fig.align='center'}
+knitr::include_graphics("Img/Fig_1.png")
+```
+
+
+## Within-Person Differenzierung
+```{r, echo = F, fig.cap="Abb. 2: MIMIC-Modell. Für Details siehe Merk et al. [-@Merk2018a]", out.width="55%", fig.align='center'}
+knitr::include_graphics("Img/Fig_2.png")
+```
+
+__Fazit:__ Hohe Konstruktvalidität, da Faktoren auf beiden Ebenen simultan trennbar und Instrument sensitiv für within-person Unterschiede.
+
+# Differentielle Überzeugungen Studierender mit MHG
+
+## Propensity Scores als Ähnlichkeitsmaß
+* Forschungsfrage adressiert Differenzen in Überzeugungen zwischen Lehramtsstudierenden mit und ohne MHG
+* Probleme: 
+     * MHG ist nicht/kaum experimentell manipulierbar
+     * MHG ist stark mit anderen Merkmalen korreliert (z.B. SES)
+* Idee: 
+     * Bildung "statistischer Zwillinge", die sich in möglichst vielen Kovariaten möglichst ähnlich sind, aber sich im MHG unterscheiden.
+     
+## Mehrdimensionale Ähnlichkeit {.nullneunem}     
+```{r, message=F, warning=FALSE, fig.height=6, fig.width=8, echo=FALSE, out.width="30%", fig.cap="Abbildung 3.", fig.align='center'}
+library(tidyverse)
+library(ggrepel)
+library(hrbrthemes)
+library(ggforce)
+
+ggplot(tibble(SES = c(100, 120, 100, 100 + 20*cos(3*pi/8), 100 + 20*cos(pi/4), 100 + 20*cos(pi/8)),
+              IQ =  c(100, 100, 120, 100 + 20*sin(3*pi/8), 100 + 20*sin(pi/4), 100 + 20*sin(pi/8)),
+              Name = c("Michael", "LeBron", "Steff", "Kobe", "Russel", "Kyrie"))) + 
+  geom_circle(aes(x0 = 100, y0 = 100, r = 20)) + 
+  geom_point(aes(SES, IQ, label = Name)) + 
+  geom_label_repel(aes(SES, IQ, label = Name),
+                   fontface = 'bold', color = '#a51e41', box.padding = unit(0.25, "lines"), 
+                   xlim = c(123, NA),
+                   fill = "white") + 
+  ggtitle("Veranschaulichung mehrdim. Abstände",
+          "Wer ist Michael am ähnlichsten?") + 
+  theme_ipsum_rc() + 
+ # coord_cartesian() + 
+    coord_fixed(xlim=c(90,160), ylim=c(90,160))
+```
+
+
+Propensity Score [PS, @Rosenbaum1983]:
+
+* Löst das Problem der mehrdimensionalen Abstände mit mehreren Metriken durch die Vereinheitlichung auf ein Wahrscheinlichkeitsmaß
+* $PS(x) := P(I^{MHG}=1|X = x)$
+
+
+## (Eigentliches) Matching
+* Vielzahl an Matching Prozeduren ist verfügbar [für eine Übersicht siehe; @Ho2007]
+* Eingesetzt wurde ein sog. One-to-One Nearest Neighbor Matching:
+     1) Wähle Individuum mit MHG und höchstem PS
+     2) Ordne dieses demjenigen Individuum ohne MHG zu, dessen PS am ähnlichsten ist
+     
+     
+## Qualitätskontrolle des Matching 
+```{r, out.width="85%", fig.cap="Abb. 4: Qualitätskontrolle des Matching. Subplots sortiert nach Cohen's d vor Matching.", echo = F, fig.align='center'}
+knitr::include_graphics("Img/Fig_4.png")
+```
+
+## Prädiktive Effekte des MHG
+```{r, out.width="100%", fig.cap="Tabelle 2: Standardisierte prädiktive Effekte des MHG (Random Intercept Modelle).", echo = F, fig.align='center'}
+knitr::include_graphics("Img/Tab_2.png")
+```
+
+## Diskussion
+* Trotz Matching: Gelegenheitsstichprobe
+* Wirkungskette bis Variablen bei Schüler\*innen sehr selten (und auch hier nicht) untersucht
+* Theoretische Motivation ist schwach:
+     * Anlass ist eine _politische_ Diskussion
+     * Polemisch lässt sich das Unterfangen auf die tautologische Formel _"Unterschiedliche Lehrer\*innen (mit/ohne MHG) sind unterschiedlich (z.B. niedrigere/höhere Kosteneinschätzungen)"_ reduzieren.
+* Theoretisch interessanter:
+     * Welche nicht kontrollierten Kovariaten bewirken die gefundenen Unterschiede in den Überzeugungen (MHG als Kausalursache theoretisch nicht plausibel, da zu distal)?
+
+
+# Anhang
+## Literaturangaben {.nullfuenfem}
